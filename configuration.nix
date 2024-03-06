@@ -4,6 +4,7 @@
   # Custom configurations specific to my NixOS-WSL setup
   wsl = {
     enable = true;
+    defaultUser = "ryzengrind"; ##EDIT_ME##
     docker-desktop.enable = false;
     nativeSystemd = true;
     startMenuLaunchers = true;
