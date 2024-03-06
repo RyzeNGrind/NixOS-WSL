@@ -37,6 +37,14 @@
           };
         in
         {
+          daimyo00 = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              self.nixosModules.default
+              initialConfig
+            ];
+          };
+
           modern = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             modules = [
