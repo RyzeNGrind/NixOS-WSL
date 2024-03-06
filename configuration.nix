@@ -70,7 +70,7 @@
     isNormalUser = true;
     hashedPassword = "$6$VOP1Yx5OUXwpOFaG$tVWf3Ai0.kzXpblhnatoeHHZb1xGKUuSEEQO79y1efrSyXR0sGmvFjo7oHbZBuQgZ3NFZi0MahU5hbyzsIwqq.";
   };
-  system.stateVersion = "23.11";
+  system.stateVersion = config.system.nixos.release;
 
   systemd.services.nix-daemon-check = {
     script = ''
