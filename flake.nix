@@ -41,7 +41,7 @@
             system = "x86_64-linux";
             modules = [
               self.nixosModules.default
-              initialConfig
+              ./configuration.nix
             ];
           };
 

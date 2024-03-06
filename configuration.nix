@@ -31,7 +31,7 @@
       { src = "${su}/bin/groupadd"; }
       { src = "${su}/bin/usermod"; }
     ];
-    tarball.configPath = ./.configuration.nix;
+    tarball.configPath = ./configuration.nix;
   };
   programs.bash.loginShellInit = "nixos-wsl-welcome";
   systemd.services.docker-desktop-proxy.script = lib.mkForce ''${config.wsl.wslConf.automount.root}/wsl/docker-desktop/docker-desktop-user-distro proxy --docker-desktop-root ${config.wsl.wslConf.automount.root}/wsl/docker-desktop "C:\Program Files\Docker\Docker\resources"'';
