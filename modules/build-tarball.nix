@@ -85,8 +85,8 @@ in
           install -Dm644 ${defaultConfig} "$root/etc/nixos/configuration.nix"
         '' else ''
           mkdir -p "$root/etc/nixos"
-          cp -R ${lib.cleanSource cfg.configPath}/. "$root/etc/nixos"
-          chmod -R u+w "$root/etc/nixos"
+          cp ${cfg.configPath} "$root/etc/nixos/configuration.nix"
+          chmod u+w "$root/etc/nixos/configuration.nix"
         ''}
 
         echo "[NixOS-WSL] Compressing..."
