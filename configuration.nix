@@ -16,7 +16,7 @@
       network = {
         generateHosts = true;
         generateResolvConf = true;
-        hostname = "daimyo00";
+        hostname = "daimyo00"; ##EDIT_ME##
       };
       interop = {
         appendWindowsPath = false;
@@ -46,7 +46,7 @@
     config.wsl.defaultUser
   ];
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = with pkgs; [ ##EDIT_ME##
     curl
     git
     wget
@@ -66,9 +66,9 @@
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" "repl-flake" "auto-allocate-uids" ];
   boot.isContainer = true;
-  users.users.ryzengrind = {
+  users.users.ryzengrind = { ##EDIT_ME##
     isNormalUser = true;
-    hashedPassword = "$6$VOP1Yx5OUXwpOFaG$tVWf3Ai0.kzXpblhnatoeHHZb1xGKUuSEEQO79y1efrSyXR0sGmvFjo7oHbZBuQgZ3NFZi0MahU5hbyzsIwqq.";
+    hashedPassword = "$6$VOP1Yx5OUXwpOFaG$tVWf3Ai0.kzXpblhnatoeHHZb1xGKUuSEEQO79y1efrSyXR0sGmvFjo7oHbZBuQgZ3NFZi0MahU5hbyzsIwqq."; ##EDIT_ME##
   };
   system.stateVersion = config.system.nixos.release;
 

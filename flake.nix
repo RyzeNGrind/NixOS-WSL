@@ -37,7 +37,7 @@
           };
         in
         {
-          daimyo00 = nixpkgs.lib.nixosSystem {
+          daimyo00 = nixpkgs.lib.nixosSystem { ##EDIT_ME##
             system = "x86_64-linux";
             modules = [
               self.nixosModules.default
