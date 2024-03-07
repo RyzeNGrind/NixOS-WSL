@@ -34,7 +34,15 @@
     ];
     tarball.configPath = ./configuration.nix;
   };
-  programs.bash.loginShellInit = "nixos-wsl-welcome";
+  programs.bash.loginShellInit = ''
+    nixos-wsl-welcome &&
+    echo "Updating Nix channel..." &&
+    sudo nix-channel --update &&
+    echo "Channels updated successfully." &&
+    echo "Upgrading NixOS system..." &&
+    sudo nixos-rebuild switch --upgrade --show-trace &&
+    echo "NixOS system upgrade completed."
+  '';
   systemd.services.docker-desktop-proxy.script = lib.mkForce ''${config.wsl.wslConf.automount.root}/wsl/docker-desktop/docker-desktop-user-distro proxy --docker-desktop-root ${config.wsl.wslConf.automount.root}/wsl/docker-desktop "C:\Program Files\Docker\Docker\resources"'';
 
   virtualisation.docker = {
