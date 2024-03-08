@@ -17,7 +17,7 @@
 
       nixosModules.wsl = {
         imports = [
-          ./modules
+          ./modules/default.nix
 
           (_: {
             wsl.version.rev = mkIf (self ? rev) self.rev;
