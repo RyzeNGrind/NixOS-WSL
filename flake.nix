@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
+    nixos-wsl.url = "github:RyzeNGrind/NixOS-WSL";
 
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -11,7 +12,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
+  outputs = inputs@{ self, nixpkgs, nixos-wsl, flake-utils, ... }:
     with nixpkgs.lib;
     {
 
@@ -42,6 +43,8 @@
             modules = [
               self.nixosModules.default
               initialConfig
+              # Import NixOS-WSL modules from the flake input
+              inputs.nixos-wsl.nixosModules.default
               ./configuration.nix
             ];
           };
