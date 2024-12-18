@@ -1,10 +1,7 @@
 name: Build Tarball
 
 on:
-  workflow_call:
-    secrets:
-      APPX_SIGNING_CERT: {}
-      CERT_ALGORITHM: {}
+  workflow_call: {}
 
 jobs:
   launcher-bundle:
@@ -19,7 +16,7 @@ jobs:
       - name: Download tarball 📥
         uses: actions/download-artifact@v4
         with:
-          name: tarball-modern
+          name: tarball
 
       - name: Download launcher binaries 📥
         uses: actions/download-artifact@v4
@@ -36,56 +33,3 @@ jobs:
         with:
           name: launcher-bundle
           path: Launcher/Launcher/pkg
-
-  launcher-msix:
-    name: MSIX 📦
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download tarball 📥
-        uses: actions/download-artifact@v4
-        with:
-          name: tarball-modern
-
-      - name: Download launcher binaries 📥
-        uses: actions/download-artifact@v4
-        with:
-          name: launcher-bin
-          path: Launcher/Launcher/
-
-      - name: Bundle tarball with launcher 📦
-        run: |
-          Copy-Item nixos-wsl.tar.gz Launcher\Launcher-Appx\
-
-      - name: Setup MSBuild 🧰
-        uses: ./.github/actions/setup-msbuild
-
-      - name: Set Versions 🏷️
-        uses: ./.github/actions/version
-
-      - name: Build MSIX package 📦
-        run: |
-          cd Launcher
-          nuget restore
-          msbuild Launcher-Appx\Launcher-Appx.wapproj /p:Configuration=Release /p:Platform=x64 /p:ContinuousIntegrationBuild=true /p:Deterministic=true
-
-      - name: Sign package ✒️
-        env:
-          APPX_SIGNING_CERT: ${{ secrets.APPX_SIGNING_CERT }}
-          CERT_ALGORITHM: ${{ secrets.CERT_ALGORITHM }}
-        if: env.APPX_SIGNING_CERT != ''
-        run: |
-          Write-Output $env:APPX_SIGNING_CERT > appx-cert.b64
-          certutil -decode appx-cert.b64 appx-cert.pfx
-          &"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64\signtool.exe" sign /fd $env:CERT_ALGORITHM /a /f appx-cert.pfx $(Get-ChildItem -Recurse -Filter "*.msixbundle")[0].FullName
-          Get-PfxCertificate appx-cert.pfx | Export-Certificate -FilePath "$($(Get-ChildItem -Recurse -Filter "*.msixbundle")[0].Directory.FullName)\certificate.cer" -Type CERT
-
-      - name: Upload MSIX 📤
-        uses: actions/upload-artifact@v4
-        with:
-          name: launcher-msix
-          path: Launcher/Launcher-Appx/AppPackages/

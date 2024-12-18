@@ -27,32 +27,32 @@ jobs:
     steps:
       - name: Download Tarball 📥
         uses: actions/download-artifact@v4
+        with:
+          name: tarball
 
-      - name: Download appx 📥
+      - name: Download bundle
         uses: actions/download-artifact@v4
         with:
-          name: appx
+          name: launcher-bundle
+          path: launcher-bundle
 
-      - name: Rename appx ✏️
-        run: mv */*.msixbundle NixOS-WSL.msixbundle
+      - name: Zip launcher bundle 📦
+        working-directory: launcher-bundle
+        run: zip -r ../NixOS-WSL-Launcher.zip .
 
       - name: Generate Checksums 🔑
         run: |
-          mv tarball-modern/nixos-wsl.tar.gz nixos-wsl.tar.gz
-          mv tarball-legacy/nixos-wsl.tar.gz nixos-wsl-legacy.tar.gz
-          for x in *.{tar.gz,msixbundle}; do
+          for x in *.{tar.gz,zip}; do
             sha256sum $x > ${x}.sha256
           done
 
       - name: Attach to Release 📎
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             nixos-wsl.tar.gz
             nixos-wsl.tar.gz.sha256
-            nixos-wsl-legacy.tar.gz
-            nixos-wsl-legacy.tar.gz.sha256
-            NixOS-WSL.msixbundle
-            NixOS-WSL.msixbundle.sha256
+            NixOS-WSL-Launcher.zip
+            NixOS-WSL-Launcher.zip.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
