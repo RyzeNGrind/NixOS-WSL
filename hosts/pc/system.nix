@@ -1,15 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  # Helper: Check if hardware-configuration.nix exists at /etc/nixos at evaluation time.
-  # In NixOS, this is not possible at pure evaluation time, so we use a pattern:
-  # - If ./hardware-configuration.nix exists in the flake, import it.
-  # - If not, generate a minimal hardware-configuration.nix at activation time.
-  #
-  # For robust, reproducible NixOS flake-based systems, always check in a hardware-configuration.nix.
-  # But for WSL or ephemeral systems, we can generate it if missing.
-  #
-  # This pattern uses lib.optional and builtins.pathExists for local dev, and a fallback for CI/first-run.
+  # Robust hardware-configuration.nix import pattern for flakes/WSL/CI
   hardwareConfigPath = ./hardware-configuration.nix;
   importHardwareConfig =
     if builtins.pathExists (toString hardwareConfigPath)
@@ -20,8 +12,7 @@ in
   # System-scoped configuration for WSL host "pc"
   imports = importHardwareConfig;
 
-  # If hardware-configuration.nix is missing, generate it at activation time.
-  # This is a NixOS module trick: run nixos-generate-config if needed.
+  # Generate hardware-configuration.nix at activation if missing (for ephemeral/CI/WSL)
   system.activationScripts.generateHardwareConfig.text =
     lib.optionalString (importHardwareConfig == [])
       ''
@@ -74,9 +65,20 @@ in
 
   users.users.ryzengrind = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    description = "ryzengrind";
+    extraGroups = [ "docker" "wheel" "ryzengrind" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPL6GOQ1zpvnxJK0Mz+vUHgEd0f/sDB0q3pa38yHHEsC ryzengrind@git"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH29BMQNo3O6KvvuquVcmCt2gF7bhD0EPvZyUD47G+3R ryzengrind@oci"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILaDf9eWQpCOZfmuCwkc0kOH6ZerU7tprDlFTc+RHxCq ryzengrind@termius"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAitSzTpub1baCfA94ja3DNZpxd74kDSZ8RMLDwOZEOw ryzengrind@nixos"
+    ];
+    # Do NOT add user packages here; use Home Manager for user-scoped packages.
+    packages = with pkgs; [
+      rustdesk-flutter
+    ];
+    hashedPassword = "$6$VOP1Yx5OUXwpOFaG$tVWf3Ai0.kzXpblhnatoeHHZb1xGKUuSEEQO79y1efrSyXR0sGmvFjo7oHbZBuQgZ3NFZi0MahU5hbyzsIwqq.";
     linger = true;
-    # All user-scoped config (shell, packages, etc) should be managed in home.nix via home-manager.
   };
 
   users.users.root = {
@@ -108,7 +110,7 @@ in
 
   boot.isContainer = true;
 
-  # Provide a minimal set of system packages; user packages go in home.nix
+  # --- Ghostty Integration: system-wide, with terminfo and shell integration for all major shells ---
   environment.systemPackages = with pkgs; [
     curl
     git
@@ -119,13 +121,36 @@ in
     tmux
     nix
     tzdata
+    ghostty
+    ghostty.terminfo
   ];
+
+  # Bash shell integration for Ghostty (enables OSC features, etc.)
+  programs.bash.interactiveShellInit = ''
+    if [[ "$TERM" == "xterm-ghostty" ]]; then
+      builtin source ${pkgs.ghostty.shell_integration}/bash/ghostty.bash
+    fi
+  '';
+
+  # Zsh shell integration for Ghostty
+  programs.zsh.interactiveShellInit = ''
+    if [[ "$TERM" == "xterm-ghostty" ]]; then
+      source ${pkgs.ghostty.shell_integration}/zsh/ghostty.zsh
+    fi
+  '';
+
+  # Fish shell integration for Ghostty
+  programs.fish.interactiveShellInit = ''
+    if test "$TERM" = "xterm-ghostty"
+      source ${pkgs.ghostty.shell_integration}/fish/ghostty.fish
+    end
+  '';
 
   # Ensure /usr/bin/systemctl and /usr/bin/grep exist for compatibility
   environment.extraInit = ''
     mkdir -p /usr/bin
-    ln -sf ${pkgs.systemd}/bin/systemctl /usr/bin/systemctl
-    ln -sf ${pkgs.gnugrep}/bin/grep /usr/bin/grep
+    sudo ln -sf ${pkgs.systemd}/bin/systemctl /usr/bin/systemctl
+    sudo ln -sf ${pkgs.gnugrep}/bin/grep /usr/bin/grep
   '';
 
   # Ensure proper user session handling
@@ -133,4 +158,9 @@ in
 
   # Enable lingering for your user
   system.stateVersion = "24.11";
+
+  # Set Ghostty as the default terminal emulator for the user (system-wide)
+  environment.variables.TERMINAL = "ghostty";
+  # Set Ghostty as the default terminal for graphical DEs (if supported)
+  xdg.terminal-exec.settings.default = [ "ghostty.desktop" ];
 }
