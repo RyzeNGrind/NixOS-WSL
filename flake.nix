@@ -6,9 +6,11 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/2411.6.0";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nixos-wsl, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, nixos-wsl, flake-parts, home-manager, ... }:
     let
       # *** THE CRITICAL FIX ***
       # For building the WSL system, we MUST use the nixpkgs that nixos-wsl depends on.
@@ -28,13 +30,10 @@
           modules = [
             ({ ... }: {
               system.configurationRevision = self.rev or "dirty";
+              wsl.tarball.configPath = ./hosts/pc;
             })
             nixos-wsl.nixosModules.default
-	    ./hosts/pc/wsl.nix
-	    #./hosts/pc/minimal.nix
-            ({ ... }: {
-	       wsl.tarball.configPath = ./hosts/pc;
-            })
+            ./hosts/pc/default.nix
           ];
         };
       };
