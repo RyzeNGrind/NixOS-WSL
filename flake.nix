@@ -216,6 +216,39 @@
               ./hosts/pc/default.nix
             ];
           };
+          # Uncomment if ws config is present
+          # ws = wsl-nixpkgs.lib.nixosSystem {
+          #   system = "x86_64-linux";
+          #   specialArgs = { inherit inputs; };
+          #   modules = [
+          #     ({ pkgs, ... }: {
+          #       system.configurationRevision = self.rev or "dirty";
+          #       wsl.tarball.configPath = ./hosts/ws;
+          #       # System-wide Ghostty support for all shells
+          #       environment.systemPackages = [
+          #         pkgs.ghostty
+          #         pkgs.ghostty.terminfo
+          #       ];
+          #       programs.bash.interactiveShellInit = ''
+          #         if [[ "$TERM" == "xterm-ghostty" ]]; then
+          #           builtin source ${pkgs.ghostty.shell_integration}/bash/ghostty.bash
+          #         fi
+          #       '';
+          #       programs.zsh.interactiveShellInit = ''
+          #         if [[ "$TERM" == "xterm-ghostty" ]]; then
+          #           source ${pkgs.ghostty.shell_integration}/zsh/ghostty-integration
+          #         fi
+          #       '';
+          #       programs.fish.interactiveShellInit = ''
+          #         if test "$TERM" = "xterm-ghostty"
+          #           source ${pkgs.ghostty.shell_integration}/fish/vendor_conf.d/ghostty-shell-integration.fish
+          #         end
+          #       '';
+          #     })
+          #     nixos-wsl.nixosModules.default
+          #     ./hosts/ws/default.nix
+          #   ];
+          # };
         };
 
         # Home Manager configuration keyed by username@hostname, not hardcoded
