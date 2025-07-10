@@ -312,11 +312,11 @@ in
         nix-index
       fi
       # Functions for ephemeral package support
-      ,,() {
-        nix run "nixpkgs#$1" -- "''${@:2}"
+      epkg() {
+        nix run "nixpkgs#$1" -- "$@"
       }
-      ,s() {
-        nix shell "nixpkgs#$1" -- "''${@:2}"
+      eshell() {
+        nix shell "nixpkgs#$1" -- "$@"
       }
       # Context-aware devshell for future MCP/Agent integration
       export NIX_CONFIG="experimental-features = nix-command flakes"

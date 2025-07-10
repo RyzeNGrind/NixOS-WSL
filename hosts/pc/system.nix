@@ -204,7 +204,7 @@ in
     settings = {
       experimental-features = [ "nix-command" "flakes" "auto-allocate-uids" ];
       auto-optimise-store = true;
-      trusted-users = [ "root" "nixos" ];
+      trusted-users = [ "root" "nixos" "ryzengrind" ];
       max-jobs = "auto";
       cores = 0;
       keep-outputs = true;
