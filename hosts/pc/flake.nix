@@ -8,8 +8,8 @@
         system = "x86_64-linux";
         modules = [
           nixos-wsl.nixosModules.default
-          #./wsl.nix
-	  ./minimal.nix
+          ./wsl.nix
+	  #./minimal.nix
         ];
       };
     };
